@@ -25,19 +25,35 @@ export async function getStaticPaths(context) {
 }
 
 export async function getStaticProps(context) {
-    const meetupId = context.params.meetupId;
+    try {
+        const meetupId = context.params.meetupId;
 
-    const client = await MongoClient.connect('mongodb+srv://pab:29x5pbl0w24CBw7l@cluster0.n2nvd.mongodb.net/test?retryWrites=true&w=majority');
-    const db = client.db();
-    const meetupsCollection = db.collection('meetups');
-    const meetup = await meetupsCollection.findOne({_id: ObjectId(meetupId)});
-    client.close();
+        const client = await MongoClient.connect('mongodb+srv://pab:29x5pbl0w24CBw7l@cluster0.n2nvd.mongodb.net/test?retryWrites=true&w=majority');
+        const db = client.db();
+        const meetupsCollection = db.collection('meetups');
+        const meetup = await meetupsCollection.findOne({_id: ObjectId(meetupId)});
+        client.close();
+
+        return {
+            props: {
+                meetup: meetup
+            },
+            revalidate: 10 //every ten sec regenerate page
+        }
+    } catch(e) {
+        console.log(e);
+    }
 
     return {
         props: {
-            meetup: meetup
+            meetup: {
+                id: 'm1',
+                title: 'Default',
+                image: 'default',
+                description: 'default',
+                address: 'Lviv'
+            }
         },
-        revalidate: 10 //every ten sec regenerate page
     }
 }
 
